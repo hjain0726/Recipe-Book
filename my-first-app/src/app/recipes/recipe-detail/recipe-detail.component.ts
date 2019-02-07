@@ -9,7 +9,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
     styleUrls: ['./recipe-detail.component.css']
 })
 export class RecipeDetailComponent implements OnInit {
-    recipe: Recipe;
+    recipe;
     id: number;
 
     constructor(private recipeService: RecipeService,
@@ -28,7 +28,7 @@ export class RecipeDetailComponent implements OnInit {
     onEditRecipe() {
         this.router.navigate(['edit'], { relativeTo: this.route });
     }
-    onDeleteRecipe(){
+    onDeleteRecipe() {
         this.recipeService.deleteRecipe(this.id);
         this.router.navigate(['/recipes']);
     }
