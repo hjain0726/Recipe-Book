@@ -3,58 +3,69 @@ import { Recipe } from './recipe.model';
 import { Ingredient } from '../shared/ingredient.model';
 import { ShoppingListService } from '../shopping-list/shopping-list.service';
 import { Subject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 
 export class RecipeService {
+    path = "http://localhost:3000/api";
     recipesChanged = new Subject<Recipe[]>();
-    private recipes: Recipe[] = [
-        new Recipe('Tasty Pizza',
-            'A super-tasty pizza -just awesome',
-            'https://www.elementstark.com/woocommerce-extension-demos/wp-content/uploads/sites/2/2016/12/pizza.jpg',
-            [
-                new Ingredient('Tomatoes', 1),
-                new Ingredient('Capsicum', 1)
-            ]),
-        new Recipe('Burger',
-            'awesome one',
-            'https://www.redrobin.com/content/dam/web/menu/tavern-menu/tavern-double-burger-1100.jpg',
-            [
-                new Ingredient('Buns', 2),
-                new Ingredient('Meat', 1)
-            ])
-    ];
+    private recipes;
 
-    constructor(private slservice: ShoppingListService) { }
+    constructor(private slservice: ShoppingListService, private http: HttpClient) { }
+
+
+    setData(recipes) {
+        this.recipes = recipes;
+        console.log(this.recipes);
+    }
 
     setRecipes(recipes: Recipe[]) {
         this.recipes = recipes;
         this.recipesChanged.next(this.recipes.slice());
     }
     getRecipes() {
-        return this.recipes.slice();
+        return this.recipes;
     }
 
     getRecipe(index: number) {
         return this.recipes[index];
     }
 
-    addIngredientsToShoppingList(ingredients: Ingredient[]) {
+    addIngredientsToShoppingList(ingredients) {
         this.slservice.addIngredients(ingredients);
     }
 
-    addRecipe(recipe: Recipe) {
-        this.recipes.push(recipe);
-        this.recipesChanged.next(this.recipes.slice());
+    getData() {
+        return this.http.get(this.path + '/getRecipe');
     }
 
-    updateRecipe(index: number, newRecipe: Recipe) {
-        this.recipes[index] = newRecipe;
-        this.recipesChanged.next(this.recipes.slice());
+    refreshData() {
+        this.getData().subscribe((recipes) => {
+            this.recipes = recipes;
+            this.recipesChanged.next(this.recipes);
+        });
+    }
+
+    addRecipe(recipe: Recipe) {
+        this.http.post(this.path + '/newRecipe', recipe).subscribe((res) => {
+            this.refreshData();
+        });
+    }
+
+    updateRecipe(index: number, newRecipe) {
+        var id = this.recipes[index]._id;
+        this.http.put(this.path + '/editRecipe/' + id, newRecipe).subscribe((res) => {
+            console.log(res);
+            this.refreshData();
+        })
     }
 
     deleteRecipe(index: number) {
-        this.recipes.splice(index, 1);
-        this.recipesChanged.next(this.recipes.slice());
+        var id = this.recipes[index]._id;
+        this.http.delete(this.path + '/deleteRecipe/' + id).subscribe((res) => {
+            this.refreshData();
+        });
     }
+
 }
