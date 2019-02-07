@@ -9,6 +9,7 @@ import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule } from "@angular/forms";
 import { RecipesRoutingModule } from "./recipes-routing.module";
 import { SharedModule } from "../shared/shared.module";
+import { HttpClientModule } from "@angular/common/http";
 
 @NgModule({
     declarations: [
@@ -23,6 +24,7 @@ import { SharedModule } from "../shared/shared.module";
         CommonModule,
         ReactiveFormsModule,
         RecipesRoutingModule,
+        HttpClientModule,
         SharedModule
     ]
 })
