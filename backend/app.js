@@ -5,7 +5,8 @@ const bodyParser = require("body-parser");
 var logger = require('morgan');
 
 var recipeRouter = require('./routes/recipes-api');
-var ingredientRouter=require('./routes/ingredient-api')
+var ingredientRouter = require('./routes/ingredient-api');
+var authRouter = require('./routes/auth-api');
 var cors = require('./utils/cors');
 
 var app = express();
@@ -18,6 +19,7 @@ app.use(cors);
 
 app.use('/api', recipeRouter);
 app.use('/api/shopping', ingredientRouter);
+app.use('/auth', authRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
