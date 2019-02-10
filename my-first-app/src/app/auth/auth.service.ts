@@ -1,53 +1,48 @@
-import * as firebase from 'firebase';
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class AuthService {
-    token: string;
-    constructor(private router: Router) { }
+    msg = new Subject();
+    path = "http://localhost:3000/auth";
+    constructor(private router: Router, private http: HttpClient) { }
     signupUser(email: string, password: string) {
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then((response) => {
-                firebase.auth().currentUser.getIdToken()
-                    .then((token: string) => {
-                        this.token = token;
-                    });
+        var obj = {
+            email: email,
+            password: password
+        }
+        this.http.post(this.path + "/signup", obj).subscribe((res) => {
+            var token = res['token'];
+            this.msg.next(res['msg']);
+            if (res['msg'] == "Successfully register") {
+                localStorage.setItem("token", token);
                 this.router.navigate(['/']);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-    signinUser(email: string, password: string) {
-        firebase.auth().signInWithEmailAndPassword(email, password)
-            .then((response) => {
-                this.router.navigate(['/']);
-                console.log(response);
-                firebase.auth().currentUser.getIdToken()
-                    .then((token: string) => {
-                        this.token = token;
-                    });
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+            }
+        });
     }
 
-    getToken() {
-        firebase.auth().currentUser.getIdToken()
-            .then((token: string) => {
-                this.token = token;
-            });
-        return this.token;
+    signinUser(email: string, password: string) {
+        var obj = {
+            email: email,
+            password: password
+        }
+        this.http.post(this.path + "/signin", obj).subscribe((res) => {
+            var token = res['token'];
+            this.msg.next(res['msg']);
+            if (res['msg'] == "successfully login") {
+                localStorage.setItem("token", token);
+                this.router.navigate(['/']);
+            }
+        });
     }
 
     isAuthenticated() {
-        return this.token != null;
+        return localStorage.getItem("token") != null;
     }
 
     logout() {
-        firebase.auth().signOut();
-        this.token = null;
+        localStorage.clear();
     }
 }
